@@ -18,12 +18,14 @@ module.exports = function(grunt) {
 				resources: [
 					'bower_components/openui5-sap.ui.core/resources',
 					'bower_components/openui5-sap.m/resources',
-					'bower_components/openui5-themelib_sap_belize/resources'
+					'bower_components/openui5-themelib_sap_belize/resources',
+					'bower_components/openui5-redux-model/dist'
 				],
 				testresources: [
 					'bower_components/openui5-sap.ui.core/test-resources',
 					'bower_components/openui5-sap.m/test-resources',
-					'bower_components/openui5-themelib_sap_belize/test-resources'
+					'bower_components/openui5-themelib_sap_belize/test-resources',
+					'bower_components/openui5-redux-model/dist'
 				],
 				cors: {
 					origin: 'http://localhost:<%= karma.options.port %>'
