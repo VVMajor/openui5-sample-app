@@ -11,7 +11,7 @@
     ```
 * Clone the repository and navigate into it
     ```sh
-    git clone https://github.com/SAP/openui5-sample-app.git
+    git clone https://github.com/VVMajor/openui5-sample-app.git
     cd openui5-sample-app
     ```
 * Install all npm dependencies (also installs all bower dependencies)
