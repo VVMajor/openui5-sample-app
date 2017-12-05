@@ -4,12 +4,12 @@ sap.ui.define([
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator",
 	"redux/ReduxModel"
-], function(Controller, JSONModel, Filter, FilterOperator, ReduxModel) {
+], function (Controller, JSONModel, Filter, FilterOperator, ReduxModel) {
 	'use strict';
 
 	return Controller.extend('sap.ui.demo.todo.controller.App', {
 
-		onInit: function() {
+		onInit: function () {
 			this.initRedux();
 			this.aSearchFilters = [];
 			this.aTabFilters = [];
@@ -36,21 +36,21 @@ sap.ui.define([
 			// sap.ui.getCore().setModel(oModel);
 			this.getView().setModel(oModel);
 
-			this.oStore.dispatch({
-				type: 'MY_ACTION',
-				meta: {},
-				payload: {}
-			});
-			this.oStore.dispatch({
-				type: 'INCREMENT',
-				meta: {},
-				payload: {}
-			});
-			this.oStore.dispatch({
-				type: 'MY_ACTION',
-				meta: {},
-				payload: {}
-			});
+			// this.oStore.dispatch({
+			// 	type: 'MY_ACTION',
+			// 	meta: {},
+			// 	payload: {}
+			// });
+			// this.oStore.dispatch({
+			// 	type: 'INCREMENT',
+			// 	meta: {},
+			// 	payload: {}
+			// });
+			// this.oStore.dispatch({
+			// 	type: 'MY_ACTION',
+			// 	meta: {},
+			// 	payload: {}
+			// });
 			// var oM = sap.ui.getCore().getModel();
 			// var oM = this.getView().getModel();
 			// var property = oM.getProperty("/completedCount");
@@ -86,49 +86,73 @@ sap.ui.define([
 				};
 			}
 			switch (action.type) {
+
 				case 'updateItemsLeftCount':
 					var aTodos = state.todos || [];
 
-					var iItemsLeft = aTodos.filter(function(oTodo) {
+					var iItemsLeft = aTodos.filter(function (oTodo) {
 						return oTodo.completed !== true;
 					}).length;
-					 // state.itemsLeftCount = iItemsLeft;
+					// state.itemsLeftCount = iItemsLeft;
 					return Object.assign({}, state, {
-						itemsLeftCount : iItemsLeft
+						itemsLeftCount: iItemsLeft
 					});
+				case 'addTodo':
+					debugger;
+					var todos = state.todos.concat( [
+						{
+							title: action.payload.newTodo,
+							completed: false
+						}]);
+
+					return Object.assign({}, state, {
+						newTodo: "",
+						todos: todos
+					});
+
 				case 'DECREMENT':
 					return Object.assign({}, state, {
-						completedCount : state.completedCount - 1
+						completedCount: state.completedCount - 1
 					});
+
 				case 'MY_ACTION':
 					return Object.assign({}, state, {
-						completedCount : state.completedCount + 100500
+						completedCount: state.completedCount + 100500
 					});
 				default:
+
 					return state;
+
 			}
 		},
 
 		/**
 		 * Adds a new todo item to the bottom of the list.
 		 */
-		addTodo: function() {
+		addTodo: function (e) {
 			var oModel = this.getView().getModel();
-			var aTodos = jQuery.extend(true, [], oModel.getProperty('/todos'));
-
-			aTodos.push({
-				title: oModel.getProperty('/newTodo'),
-				completed: false
+			this.oStore.dispatch({
+				type: 'addTodo',
+				meta: {},
+				payload: {newTodo: e.getParameter("value")}
 			});
 
-			oModel.setProperty('/todos', aTodos);
-			oModel.setProperty('/newTodo', '');
+			// var oModel = this.getView().getModel();
+			// var aTodos = jQuery.extend(true, [], oModel.getProperty('/todos'));
+			//
+			// aTodos.push({
+			// 	title: oModel.getProperty('/newTodo'),
+			// 	completed: false
+			// });
+			//
+			// oModel.setProperty('/todos', aTodos);
+			// oModel.setProperty('/newTodo', '');
 		},
 
 		/**
 		 * Removes all completed items from the todo list.
 		 */
-		clearCompleted: function() {
+		clearCompleted: function () {
 			var oModel = this.getView().getModel();
 			var aTodos = jQuery.extend(true, [], oModel.getProperty('/todos'));
 
@@ -146,14 +170,14 @@ sap.ui.define([
 		/**
 		 * Updates the number of items not yet completed
 		 */
-		updateItemsLeftCount: function() {
+		updateItemsLeftCount: function () {
 			// var oModel = this.getView().getModel();
 			// var aTodos = oModel.getProperty('/todos') || [];
-      //
+			//
 			// var iItemsLeft = aTodos.filter(function(oTodo) {
 			// 	return oTodo.completed !== true;
 			// }).length;
-      //
+			//
 			// oModel.setProperty('/itemsLeftCount', iItemsLeft);
 
 			this.oStore.dispatch({
@@ -167,7 +191,7 @@ sap.ui.define([
 		 * Trigger search for specific items. The removal of items is disable as long as the search is used.
 		 * @param {sap.ui.base.Event} oEvent Input changed event
 		 */
-		onSearch: function(oEvent) {
+		onSearch: function (oEvent) {
 			var oModel = this.getView().getModel();
 
 			// First reset current filters
@@ -186,7 +210,7 @@ sap.ui.define([
 			this._applyListFilters();
 		},
 
-		onFilter: function(oEvent) {
+		onFilter: function (oEvent) {
 
 			// First reset current filters
 			this.aTabFilters = [];
@@ -204,13 +228,13 @@ sap.ui.define([
 					break;
 				case "all":
 				default:
-					// Don't use any filter
+				// Don't use any filter
 			}
 
 			this._applyListFilters();
 		},
 
-		_applyListFilters: function() {
+		_applyListFilters: function () {
 			var oList = this.byId("todoList");
 			var oBinding = oList.getBinding("items");
 
