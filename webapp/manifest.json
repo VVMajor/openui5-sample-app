@@ -23,7 +23,7 @@
 					"bundleName": "sap.ui.demo.todo.i18n.i18n"
 				}
 			},
-			"": {
+			"original": {
 				"type": "sap.ui.model.json.JSONModel",
 				"uri": "model/todoitems.json"
 			}

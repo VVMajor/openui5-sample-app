@@ -26,5 +26,9 @@
     "karma-qunit": "^1.2.1",
     "karma-sinon": "^1.0.5",
     "qunitjs": "^2.0.0"
+  },
+  "dependencies": {
+    "redux": "^3.7.2",
+    "redux-logger": "^3.0.6"
   }
 }

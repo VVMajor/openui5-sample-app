@@ -2,15 +2,111 @@ sap.ui.define([
 	"sap/ui/core/mvc/Controller",
 	"sap/ui/model/json/JSONModel",
 	"sap/ui/model/Filter",
-	"sap/ui/model/FilterOperator"
-], function(Controller, JSONModel, Filter, FilterOperator) {
+	"sap/ui/model/FilterOperator",
+	"redux/ReduxModel"
+], function(Controller, JSONModel, Filter, FilterOperator, ReduxModel) {
 	'use strict';
 
 	return Controller.extend('sap.ui.demo.todo.controller.App', {
 
 		onInit: function() {
+			this.initRedux();
 			this.aSearchFilters = [];
 			this.aTabFilters = [];
+		},
+
+		oStore: null,
+
+		initRedux: function () {
+			// debugger;
+			// https://blogs.sap.com/2017/02/02/building-a-sapui5-application-with-predictable-state-container/
+
+			this.oStore = Redux.createStore(
+				this.fnReducer,
+				Redux.applyMiddleware(
+					reduxLogger.createLogger()
+				)
+			);
+
+			var oModel = new ReduxModel(this.oStore, {
+				selectorCompletedCount: function (state, context) {
+					return state.completedCount;
+				}
+			});
+			// sap.ui.getCore().setModel(oModel);
+			this.getView().setModel(oModel);
+
+			this.oStore.dispatch({
+				type: 'MY_ACTION',
+				meta: {},
+				payload: {}
+			});
+			this.oStore.dispatch({
+				type: 'INCREMENT',
+				meta: {},
+				payload: {}
+			});
+			this.oStore.dispatch({
+				type: 'MY_ACTION',
+				meta: {},
+				payload: {}
+			});
+			// var oM = sap.ui.getCore().getModel();
+			// var oM = this.getView().getModel();
+			// var property = oM.getProperty("/completedCount");
+			//  var s = this.oStore.getState();
+			//  debugger;
+		},
+
+		fnReducer: function (state, action) {
+			// debugger;
+			if (typeof state === "undefined") {
+				state = {
+					"newTodo": "",
+					"todos": [{
+						"title": "Start this app",
+						"completed": true
+					},
+						{
+							"title": "Learn OpenUI5",
+							"completed": false
+						},
+						{
+							"title": "Learn redux",
+							"completed": false
+						},
+						{
+							"title": "Make Presentation",
+							"completed": false
+						}
+					],
+					"itemsRemovable": true,
+					"completedCount": 1,
+					"itemsLeftCount": 3
+				};
+			}
+			switch (action.type) {
+				case 'updateItemsLeftCount':
+					var aTodos = state.todos || [];
+
+					var iItemsLeft = aTodos.filter(function(oTodo) {
+						return oTodo.completed !== true;
+					}).length;
+					 // state.itemsLeftCount = iItemsLeft;
+					return Object.assign({}, state, {
+						itemsLeftCount : iItemsLeft
+					});
+				case 'DECREMENT':
+					return Object.assign({}, state, {
+						completedCount : state.completedCount - 1
+					});
+				case 'MY_ACTION':
+					return Object.assign({}, state, {
+						completedCount : state.completedCount + 100500
+					});
+				default:
+					return state;
+			}
 		},
 
 		/**
@@ -51,14 +147,20 @@ sap.ui.define([
 		 * Updates the number of items not yet completed
 		 */
 		updateItemsLeftCount: function() {
-			var oModel = this.getView().getModel();
-			var aTodos = oModel.getProperty('/todos') || [];
+			// var oModel = this.getView().getModel();
+			// var aTodos = oModel.getProperty('/todos') || [];
+      //
+			// var iItemsLeft = aTodos.filter(function(oTodo) {
+			// 	return oTodo.completed !== true;
+			// }).length;
+      //
+			// oModel.setProperty('/itemsLeftCount', iItemsLeft);
 
-			var iItemsLeft = aTodos.filter(function(oTodo) {
-				return oTodo.completed !== true;
-			}).length;
-
-			oModel.setProperty('/itemsLeftCount', iItemsLeft);
+			this.oStore.dispatch({
+				type: 'updateItemsLeftCount',
+				meta: {},
+				payload: {}
+			});
 		},
 
 		/**
