@@ -1,7 +1,7 @@
 <mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" controllerName="sap.ui.demo.todo.controller.App" displayBlock="true">
 	<Shell>
 		<App>
-			<Page title="{/selector/selectorCompletedCount} {i18n>TITLE}" backgroundDesign="Solid">
+			<Page title="{i18n>TITLE}" backgroundDesign="Solid">
 				<subHeader>
 					<Toolbar>
 						<SearchField
@@ -11,10 +11,11 @@
 					</Toolbar>
 				</subHeader>
 				<content>
-					<Input class="todoInput" id="addTodoItemInput" value="{/newTodo}" placeholder="{i18n>INPUT_PLACEHOLDER}" change="addTodo" />
+					<Input class="todoInput" id="addTodoItemInput" value="{/selector/selectorNewTodo}" placeholder="{i18n>INPUT_PLACEHOLDER}" change="addTodo" />
 					<List id="todoList"
 						items="{ path: '/todos', events: { change: '.updateItemsLeftCount' } }"
-						mode="MultiSelect"
+								selectionChange="onSelectionChange"
+								mode="MultiSelect"
 						growing="true"
 						growingScrollToLoad="true"
 						showNoData="false"
@@ -25,7 +26,7 @@
 								<Label id="itemsLeftLabel" text="{= ${/itemsLeftCount} === 1 ? ${/itemsLeftCount} + ' ' + ${i18n>ITEM_LEFT} : ${/itemsLeftCount} + ' ' + ${i18n>ITEMS_LEFT} }"/>
 							</Toolbar>
 						</infoToolbar>
-						<CustomListItem class="todoListItem" selected="{completed}" press="updateItemsLeftCount">
+						<CustomListItem class="todoListItem" selected="{completed}" >
 							<Input enabled="{=!${completed}}" value="{title}"/>
 						</CustomListItem>
 					</List>
@@ -42,7 +43,7 @@
 							</SegmentedButton>
 						</contentMiddle>
 						<contentRight>
-							<Button id="clearCompleted" enabled="{/itemsRemovable}" icon="sap-icon://delete" text="{i18n>CLEAR_COMPLETED}" press="clearCompleted" />
+							<Button id="clearCompleted" enabled="{/itemsRemovable}" icon="sap-icon://delete" text="{i18n>CLEAR_COMPLETED} {/selector/selectorCompletedCount} " press="clearCompleted" />
 						</contentRight>
 					</Bar>
 				</footer>

@@ -31,31 +31,14 @@ sap.ui.define([
 			var oModel = new ReduxModel(this.oStore, {
 				selectorCompletedCount: function (state, context) {
 					return state.completedCount;
+				},
+				selectorNewTodo: function (state, context) {
+					return state.newTodo;
 				}
 			});
 			// sap.ui.getCore().setModel(oModel);
 			this.getView().setModel(oModel);
 
-			// this.oStore.dispatch({
-			// 	type: 'MY_ACTION',
-			// 	meta: {},
-			// 	payload: {}
-			// });
-			// this.oStore.dispatch({
-			// 	type: 'INCREMENT',
-			// 	meta: {},
-			// 	payload: {}
-			// });
-			// this.oStore.dispatch({
-			// 	type: 'MY_ACTION',
-			// 	meta: {},
-			// 	payload: {}
-			// });
-			// var oM = sap.ui.getCore().getModel();
-			// var oM = this.getView().getModel();
-			// var property = oM.getProperty("/completedCount");
-			//  var s = this.oStore.getState();
-			//  debugger;
 		},
 
 		fnReducer: function (state, action) {
@@ -95,30 +78,55 @@ sap.ui.define([
 					}).length;
 					// state.itemsLeftCount = iItemsLeft;
 					return Object.assign({}, state, {
-						itemsLeftCount: iItemsLeft
+						itemsLeftCount: iItemsLeft,
+						completedCount: aTodos.length - iItemsLeft
 					});
+
 				case 'addTodo':
-					debugger;
-					var todos = state.todos.concat( [
-						{
-							title: action.payload.newTodo,
-							completed: false
-						}]);
 
 					return Object.assign({}, state, {
 						newTodo: "",
-						todos: todos
+						todos: state.todos.concat([
+							{
+								title: action.payload.newTodo,
+								completed: false
+							}])
 					});
 
-				case 'DECREMENT':
+				case 'storeTodo':
 					return Object.assign({}, state, {
-						completedCount: state.completedCount - 1
+						newTodo: action.payload.newTodo
 					});
 
-				case 'MY_ACTION':
+				case 'updateCompleted':
+
+					var aUpdatedTodos = state.todos.slice();
+					for (var i = 0; i < aUpdatedTodos.length; i++) {
+						aUpdatedTodos[i].completed = action.payload.aPath.includes("" + i);
+					}
 					return Object.assign({}, state, {
-						completedCount: state.completedCount + 100500
+						todos: aUpdatedTodos
 					});
+
+				case 'clearCompleted':
+
+					var aClearedTodos = state.todos.slice();
+					var j = aClearedTodos.length;
+					while (j--) {
+						if (aClearedTodos[j].completed) {
+							aClearedTodos.splice(j, 1);
+						}
+					}
+					return Object.assign({}, state, {
+						todos: aClearedTodos
+					});
+
+				case 'setItemsRemovable':
+					return Object.assign({}, state, {
+						itemsRemovable: action.payload.itemsRemovable
+					});
+
+
 				default:
 
 					return state;
@@ -130,7 +138,11 @@ sap.ui.define([
 		 * Adds a new todo item to the bottom of the list.
 		 */
 		addTodo: function (e) {
-			var oModel = this.getView().getModel();
+			this.oStore.dispatch({
+				type: 'storeTodo',
+				meta: {},
+				payload: {newTodo: e.getParameter("value")}
+			});
 			this.oStore.dispatch({
 				type: 'addTodo',
 				meta: {},
@@ -149,22 +161,57 @@ sap.ui.define([
 			// oModel.setProperty('/newTodo', '');
 		},
 
+
+		onSelectionChange: function (oEventArgs) {
+
+			var aSelectedItems = oEventArgs.getSource().getSelectedItems();
+			var aPath = [];
+			for (var i = 0; i<aSelectedItems.length; i++){
+				aPath.push(aSelectedItems[i].mBindingInfos.selected.binding.oContext.sPath.split("/")[2]);
+			}
+
+			this.oStore.dispatch({
+				type: 'updateCompleted',
+				meta: {},
+				payload: {aPath: aPath}
+			});
+
+			this.oStore.dispatch({
+				type: 'updateItemsLeftCount',
+				meta: {},
+				payload: {}
+			});
+
+		},
 		/**
 		 * Removes all completed items from the todo list.
 		 */
 		clearCompleted: function () {
-			var oModel = this.getView().getModel();
-			var aTodos = jQuery.extend(true, [], oModel.getProperty('/todos'));
 
-			var i = aTodos.length;
-			while (i--) {
-				var oTodo = aTodos[i];
-				if (oTodo.completed) {
-					aTodos.splice(i, 1);
-				}
-			}
+			this.oStore.dispatch({
+				type: 'clearCompleted',
+				meta: {},
+				payload: {}
+			});
 
-			oModel.setProperty('/todos', aTodos);
+			this.oStore.dispatch({
+				type: 'updateItemsLeftCount',
+				meta: {},
+				payload: {}
+			});
+
+			// var oModel = this.getView().getModel();
+			// var aTodos = jQuery.extend(true, [], oModel.getProperty('/todos'));
+      //
+			// var i = aTodos.length;
+			// while (i--) {
+			// 	var oTodo = aTodos[i];
+			// 	if (oTodo.completed) {
+			// 		aTodos.splice(i, 1);
+			// 	}
+			// }
+      //
+			// oModel.setProperty('/todos', aTodos);
 		},
 
 		/**
@@ -200,11 +247,21 @@ sap.ui.define([
 			// add filter for search
 			var sQuery = oEvent.getSource().getValue();
 			if (sQuery && sQuery.length > 0) {
-				oModel.setProperty('/itemsRemovable', false);
+				// oModel.setProperty('/itemsRemovable', false);
+				this.oStore.dispatch({
+					type: 'setItemsRemovable',
+					meta: {},
+					payload: {itemsRemovable: false}
+				});
 				var filter = new Filter("title", FilterOperator.Contains, sQuery);
 				this.aSearchFilters.push(filter);
 			} else {
-				oModel.setProperty('/itemsRemovable', true);
+				// oModel.setProperty('/itemsRemovable', true);
+				this.oStore.dispatch({
+					type: 'setItemsRemovable',
+					meta: {},
+					payload: {itemsRemovable: true}
+				});
 			}
 
 			this._applyListFilters();
