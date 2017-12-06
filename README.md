@@ -1,7 +1,7 @@
 ![OpenUI5 logo](http://openui5.org/images/OpenUI5_new_big_side.png)
 
-# openui5-sample-app
-> [OpenUI5](https://github.com/SAP/openui5) sample app using Grunt, Karma & Bower
+# openui5-sample-app refactored by Volodymyr Maiorov
+> [OpenUI5](https://github.com/SAP/openui5) sample app using Grunt, Karma & Bower refactored by Volodymyr Maiorov for demonstartion of using openui5-redux-model
 
 ## Getting started
 * Install Node.js (from [nodejs.org](http://nodejs.org/)).
